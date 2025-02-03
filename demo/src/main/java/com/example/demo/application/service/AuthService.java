@@ -18,7 +18,7 @@ public class AuthService {
 
     public Optional<String> authenticate(String nuip, String password) {
         return userRepository.findByNuip(nuip)
-                .filter(user -> passwordEncoder.matches(password, user.getContraseña()))
+                .filter(user -> passwordEncoder.matches(password, user.getPassword()))
                 .map(user -> {
                     String token = jwtUtil.generateToken(user.getNuip());
                     System.out.println("Generated JWT: " + token); 

@@ -19,19 +19,19 @@ public class User {
     private Long id;
 
     @Column(name = "id_tipo_documento", nullable = false)
-    private Integer idTipoDocumento;
+    private Integer idDocumentTIpe;
 
     @Column(unique = true, nullable = false)
     private String nuip;
 
 
     @Column(nullable = false)
-    private String contraseña;
+    private String password;
 
 
-public void setContraseña(String contraseña) {
+public void setPassword(String password) {
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    this.contraseña = passwordEncoder.encode(contraseña);
+    this.password = passwordEncoder.encode(password);
 }
 
 }
