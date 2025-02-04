@@ -1,5 +1,6 @@
 package com.example.demo.application.service;
 
+import com.example.demo.domain.model.User;
 import com.example.demo.infrastructure.repository.UserRepository;
 import com.example.demo.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -14,15 +15,26 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
-    private final PasswordEncoder passwordEncoder; 
+    private final PasswordEncoder passwordEncoder;
 
+    // Método para autenticar usuarios
     public Optional<String> authenticate(String nuip, String password) {
         return userRepository.findByNuip(nuip)
                 .filter(user -> passwordEncoder.matches(password, user.getPassword()))
                 .map(user -> {
                     String token = jwtUtil.generateToken(user.getNuip());
-                    System.out.println("Generated JWT: " + token); 
+                    System.out.println("Generated JWT: " + token);
                     return token;
                 });
+    }
+
+    public boolean registerUser(User user) {
+        if (userRepository.existsByNuip(user.getNuip())) {
+            return false; 
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        
+        userRepository.save(user);
+        return true;
     }
 }
