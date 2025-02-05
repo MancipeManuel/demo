@@ -1,6 +1,5 @@
 package com.example.demo.domain.model;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,11 +22,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String nuip;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String password;
 
-    public void encryptPassword() {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        this.password = passwordEncoder.encode(this.password);
-    }
 }

@@ -32,9 +32,12 @@ public class AuthService {
         if (userRepository.existsByNuip(user.getNuip())) {
             return false; 
         }
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+            throw new IllegalArgumentException("La contraseña no puede ser nula o vacía");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         
         userRepository.save(user);
         return true;
-    }
+    }    
 }

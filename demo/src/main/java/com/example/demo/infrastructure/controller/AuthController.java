@@ -32,7 +32,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
         boolean userCreated = authService.registerUser(user);
-
+    
         if (userCreated) {
             return ResponseEntity.status(201).body("Usuario registrado exitosamente");
         } else {
