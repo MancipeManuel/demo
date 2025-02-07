@@ -28,17 +28,20 @@ public class AuthController {
                     .orElseGet(() -> ResponseEntity.status(401).body(Map.of("error", "Credenciales incorrectas")));
     }
 
-    // ✅ Registro de usuario
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody User user) {
+@PostMapping("/register")
+public ResponseEntity<String> register(@RequestBody User user) {
+    try {
         boolean userCreated = authService.registerUser(user);
-    
         if (userCreated) {
             return ResponseEntity.status(201).body("Usuario registrado exitosamente");
         } else {
             return ResponseEntity.status(400).body("El usuario ya existe");
         }
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.status(400).body(e.getMessage());
     }
+}
+
     @PutMapping("/update-password")
     public ResponseEntity<String> updatePassword(@RequestBody Map<String, String> request) {
         String nuip = request.get("nuip");
@@ -51,6 +54,28 @@ public class AuthController {
             return ResponseEntity.ok("Contraseña actualizada exitosamente");
         } else {
             return ResponseEntity.status(400).body("Error al actualizar la contraseña, verifica tu contraseña actual");
+        }
+    }
+    @PostMapping("/request-password-reset")
+    public ResponseEntity<String> requestPasswordReset(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        if (authService.generateResetToken(email)) {
+            return ResponseEntity.ok("Se ha enviado un correo con el token de recuperación.");
+        } else {
+            return ResponseEntity.status(400).body("Correo no encontrado.");
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+
+        if (authService.resetPassword(token, newPassword)) {
+            return ResponseEntity.ok("Contraseña restablecida con éxito.");
+        } else {
+            return ResponseEntity.status(400).body("Token inválido o expirado.");
         }
     }
 }

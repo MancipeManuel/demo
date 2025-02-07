@@ -8,5 +8,8 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByNuip(String nuip);
-    boolean existsByNuip(String nuip); // ✅ Verificar si el usuario ya está registrado
+    Optional<User> findByEmail(String email);
+    Optional<User> findByResetToken(String resetToken);
+    boolean existsByNuip(String nuip);
+    boolean existsByEmail(String email);
 }

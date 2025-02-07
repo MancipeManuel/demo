@@ -26,13 +26,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf.disable()) // ❗ Deshabilita CSRF (para pruebas)
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/auth/login", "/auth/register",  "/auth/update-password").permitAll() 
+                .requestMatchers("/auth/login", "/auth/register", "/auth/update-password", "/auth/request-password-reset", "/auth/reset-password").permitAll() // 🔹 Corregí las rutas
                 .anyRequest().authenticated()
             )
-            .csrf(csrf -> csrf.disable()) 
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        
+    
         return http.build();
     }
+    
 }
