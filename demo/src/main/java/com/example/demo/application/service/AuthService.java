@@ -39,5 +39,23 @@ public class AuthService {
         
         userRepository.save(user);
         return true;
-    }    
+    } 
+      public boolean updatePassword(String nuip, String oldPassword, String newPassword) {
+        Optional<User> optionalUser = userRepository.findByNuip(nuip);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+                return false; // ❌ Contraseña actual incorrecta
+            }
+
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+            return true;
+        }
+
+        return false; // ❌ Usuario no encontrado
+    }
+   
 }

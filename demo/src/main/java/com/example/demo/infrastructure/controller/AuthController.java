@@ -39,4 +39,18 @@ public class AuthController {
             return ResponseEntity.status(400).body("El usuario ya existe");
         }
     }
+    @PutMapping("/update-password")
+    public ResponseEntity<String> updatePassword(@RequestBody Map<String, String> request) {
+        String nuip = request.get("nuip");
+        String oldPassword = request.get("oldPassword");
+        String newPassword = request.get("newPassword");
+
+        boolean passwordUpdated = authService.updatePassword(nuip, oldPassword, newPassword);
+
+        if (passwordUpdated) {
+            return ResponseEntity.ok("Contraseña actualizada exitosamente");
+        } else {
+            return ResponseEntity.status(400).body("Error al actualizar la contraseña, verifica tu contraseña actual");
+        }
+    }
 }
