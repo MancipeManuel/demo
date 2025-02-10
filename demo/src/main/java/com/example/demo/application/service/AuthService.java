@@ -29,7 +29,6 @@ public class AuthService {
                 .filter(user -> passwordEncoder.matches(password, user.getPassword()))
                 .map(user -> {
                     String token = jwtUtil.generateToken(user.getNuip());
-                    System.out.println("Generated JWT: " + token);
                     return token;
                 });
     }
