@@ -16,8 +16,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "id_tipo_documento", nullable = false)
-    private Integer idDocumentType;
+    @ManyToOne
+    @JoinColumn(name = "id_tipo_documento", nullable = false)
+    private DocumentType documentType;  // Ahora el nombre es coherente
+
 
     @Column(unique = true, nullable = false)
     private String nuip;
@@ -28,4 +30,14 @@ public class User {
     private String email;
 
     private String resetToken; 
+
+    @ManyToOne
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
+    @Transient
+    private Long roleId;
+
+    @Transient
+    private Long documentTypeId;
 }

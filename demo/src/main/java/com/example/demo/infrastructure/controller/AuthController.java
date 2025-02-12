@@ -3,11 +3,12 @@ package com.example.demo.infrastructure.controller;
 import com.example.demo.application.service.AuthService;
 import com.example.demo.domain.model.User;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -19,63 +20,49 @@ public class AuthController {
     // ✅ Login de usuario
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
-        String nuip = credentials.get("nuip");
-        String password = credentials.get("password");
-
-        Optional<String> token = authService.authenticate(nuip, password);
-
-        return token.map(jwt -> ResponseEntity.ok(Map.of("token", jwt)))
-                    .orElseGet(() -> ResponseEntity.status(401).body(Map.of("error", "Credenciales incorrectas")));
+        return authService.authenticate(credentials.get("nuip"), credentials.get("password"))
+                .map(jwt -> ResponseEntity.ok(Map.of("token", jwt)))
+                .orElseGet(() -> ResponseEntity.status(401).body(Map.of("error", "Credenciales incorrectas")));
     }
 
+    // ✅ Registro de usuario
 @PostMapping("/register")
 public ResponseEntity<String> register(@RequestBody User user) {
     try {
-        boolean userCreated = authService.registerUser(user);
-        if (userCreated) {
-            return ResponseEntity.status(201).body("Usuario registrado exitosamente");
+        boolean isRegistered = authService.registerUser(user);
+
+        if (isRegistered) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Usuario registrado exitosamente");
         } else {
-            return ResponseEntity.status(400).body("El usuario ya existe");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El usuario ya existe o los datos son inválidos");
         }
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.status(400).body(e.getMessage());
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error en el registro: " + e.getMessage());
     }
 }
 
+
+    // ✅ Actualizar contraseña
     @PutMapping("/update-password")
     public ResponseEntity<String> updatePassword(@RequestBody Map<String, String> request) {
-        String nuip = request.get("nuip");
-        String oldPassword = request.get("oldPassword");
-        String newPassword = request.get("newPassword");
-
-        boolean passwordUpdated = authService.updatePassword(nuip, oldPassword, newPassword);
-
-        if (passwordUpdated) {
-            return ResponseEntity.ok("Contraseña actualizada exitosamente");
-        } else {
-            return ResponseEntity.status(400).body("Error al actualizar la contraseña, verifica tu contraseña actual");
-        }
+        return authService.updatePassword(request.get("nuip"), request.get("oldPassword"), request.get("newPassword"))
+                ? ResponseEntity.ok("Contraseña actualizada exitosamente")
+                : ResponseEntity.status(400).body("Error al actualizar la contraseña, verifica tu contraseña actual");
     }
+
+    // ✅ Solicitar token de recuperación de contraseña
     @PostMapping("/request-password-reset")
     public ResponseEntity<String> requestPasswordReset(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-
-        if (authService.generateResetToken(email)) {
-            return ResponseEntity.ok("Se ha enviado un correo con el token de recuperación.");
-        } else {
-            return ResponseEntity.status(400).body("Correo no encontrado.");
-        }
+        return authService.generateResetToken(request.get("email"))
+                ? ResponseEntity.ok("Se ha enviado un correo con el token de recuperación.")
+                : ResponseEntity.status(400).body("Correo no encontrado.");
     }
 
+    // ✅ Restablecer contraseña
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
-        String token = request.get("token");
-        String newPassword = request.get("newPassword");
-
-        if (authService.resetPassword(token, newPassword)) {
-            return ResponseEntity.ok("Contraseña restablecida con éxito.");
-        } else {
-            return ResponseEntity.status(400).body("Token inválido o expirado.");
-        }
+        return authService.resetPassword(request.get("token"), request.get("newPassword"))
+                ? ResponseEntity.ok("Contraseña restablecida con éxito.")
+                : ResponseEntity.status(400).body("Token inválido o expirado.");
     }
 }
