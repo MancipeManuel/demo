@@ -61,9 +61,17 @@ public class AuthService {
         user.setDocumentType(documentType);
     
         // ✅ Validar y asignar Role
-        Role role = roleRepository.findById(user.getRoleId())
-            .orElseThrow(() -> new IllegalArgumentException("Rol no válido"));
-        user.setRole(role);
+        if (user.getRoleId() == null) {
+            // 🔥 Asignar un rol por defecto si no se envía
+            Role defaultRole = roleRepository.findByName("CANDIDATO") // Busca el rol "USER" por defecto
+                .orElseThrow(() -> new IllegalArgumentException("Rol por defecto no encontrado"));
+            user.setRole(defaultRole);
+        } else {
+            Role role = roleRepository.findById(user.getRoleId())
+                .orElseThrow(() -> new IllegalArgumentException("Rol no válido"));
+            user.setRole(role);
+        }
+
         
         // ✅ Encriptar contraseña
         user.setPassword(passwordEncoder.encode(user.getPassword()));
